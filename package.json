@@ -1,0 +1,19 @@
+{
+  "name": "properties_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "jsverify": "^0.8.3"
+    "mocha": "^4.0.1",
+    "sinon": "^4.0.1"
+  }
+}
