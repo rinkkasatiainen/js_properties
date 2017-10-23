@@ -1,20 +1,34 @@
 
+const C = [200, 100, 50, 20, 10]
+
 class CoinChanger {
 
   change(amount) {
-    return this.recur_f(amount)
+    let change = []
+    return this.f(amount)
+    //return this.tail_recur(amount)
   }
 
-  recur_f(amount, carry=[], coins=[200,100,50,20,10]){
-    const coin = coins[0]
-    if(coins.length === 0){
-      return carry
+  f(amount, coins=C) {
+    let change=[]
+    for( const coin of coins){
+      while(amount >= coin){
+        change = [...change, coin]
+        amount -= coin
+      }
     }
-    if( amount >= coin){
-      return this.recur_f(amount-coin, [...carry, coin], coins)
+    return change
+  }
+
+  tail_recur(amount, change = [], coins = C){
+    const [coin, ...rest] = coins
+    if(amount === 0){
+      return change
     }
-    const [first, ...rest] = coins
-    return this.recur_f(amount, carry, rest)
+    if(amount >= coin){
+      return this.tail_recur( amount-coin, [...change, coin], coins )
+    }
+    return this.tail_recur( amount, change, rest)
   }
 }
 

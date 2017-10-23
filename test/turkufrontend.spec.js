@@ -4,13 +4,16 @@ import R from 'ramda';
 
 import CoinChanger from '../coin-changer'
 import Purse from '../purse'
-import {sents, coins, coin} from './generators'
+import {sents, coins, coin, moreThan6EUR} from './generators'
 
 describe('test env', () => {
   it('should do booleans', () => {
     expect(true).to.eql(true);
   });
 });
+
+const coinChanger = new CoinChanger();
+const purse = new Purse();
 
 describe('CoinChanger', () => {
   const coinChanger = new CoinChanger()
@@ -21,57 +24,50 @@ describe('CoinChanger', () => {
     )
   });
 
-  it('returned sum of coins should match', () => {
-    jsc.assertForall(sents, (sents) => {
-      const amount = sents.coins
+
+  it('sum of coins should be exactly the same as original', () => {
+    jsc.assertForall(sents, (coin_amount) => {
+      const amount = coin_amount.coins
       const change = coinChanger.change(amount)
 
-      const c_sum = change.reduce((sum, coin) => sum + coin, 0)
-      return c_sum === amount
-
+      const sum = change.reduce((s,c) => s+c, 0);
+      return sum === amount
     })
   });
 
-  it('should have 10 cents at most once', () => {
-    jsc.assertForall(sents, (sents) => {
-      const amount = sents.coins
-      const change = coinChanger.change(amount);
+  it('should have a max 1 coin of 10 cents', () => {
+    jsc.assertForall(sents, (coin_amount) => {
+      const amount = coin_amount.coins
+      const change = coinChanger.change(amount)
 
-      return change.filter(c=>c===10).length <= 1
+      return change.filter(c => c === 10).length <= 1 ;
+    });
+  })
+
+  it('should have max 2 coins of each coins except 2 eur', () => {
+    jsc.assertForall(sents, (coin_amount) => {
+      const amount = coin_amount.coins
+      const change = coinChanger.change(amount)
+
+      const coins = purse.collect(change) 
+
+      const foo = Object.keys(coins).filter( c => c != 200 ).map( c => coins[c]).filter( s => s > 2)
+
+      return foo.length === 0
     });
   });
 
-  it('should have all coins, except 2EUR, at max twice', ()=> {
-    jsc.assertForall(sents, (sents) => {
-      const amount = sents.coins
-      const change = coinChanger.change(amount);
-      const purse = new Purse().collect(change);
+  it('when more than 6 euros, should have more than 2 coins or 2EUR', () => {
+    jsc.assertForall(moreThan6EUR, (coin_amount) => {
+      const amount = coin_amount.coins
+      const change = coinChanger.change(amount)
 
-//      const calc_coin = (c, a, o) => c*a;
-//      const f = R.mapObjIndexed(calc_coin, purse)
+      const coins = purse.collect(change) 
 
-      let c = Object.keys(purse).filter(c=>c!=='200').map(
-        c=>purse[c]).filter(x=>x>2);
+      return coins[200] > 2;
+    });
 
-      return c.length === 0;
-    })
-  })
-
-  it('can have more than 2 coins, if more than 6 EUR', () => {
-    jsc.assertForall(sents, (sents) => {
-      const amount = sents.coins
-      const change = coinChanger.change(amount);
-      const purse = new Purse().collect(change);
-
-//      const calc_coin = (c, a, o) => c*a;
-//      const f = R.mapObjIndexed(calc_coin, purse)
-
-      let c = Object.keys(purse).filter(c=>c===200).map(
-        c=>purse[c]).filter(x=>x>2);
-
-      return c.length < 1;
-    })
-  })
+  });
 })
 
 
