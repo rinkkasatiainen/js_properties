@@ -129,8 +129,9 @@ class CoinChanger{
 
   change_recur(carry, coins, amount){
     for( const coin of coins){
-      if( amount >= coin ){
-        return this.change_recur( [...carry, coin ], coins, amount - coin )
+      while( amount >= coin ){
+        carry = [...carry, coin]
+        amount -= coin
       }
     }
     return carry
